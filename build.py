@@ -44,6 +44,10 @@ def fetch(url, timeout=60, retries=2):
     raise last
 
 
+def _visible_text(html_str):
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html_str))
+
+
 def cached_doc_html():
     os.makedirs(CACHE, exist_ok=True)
     path = os.path.join(CACHE, "doc.html")
@@ -51,6 +55,13 @@ def cached_doc_html():
         body = fetch(f"https://docs.google.com/document/d/{DOC_ID}/export?format=html")
         if "<body" not in body:
             raise ValueError("no body in export")
+        # Google's export markup is volatile (class names shuffle) even when the
+        # doc is unchanged; only rewrite the committed cache on real edits so
+        # the Action's auto-commit doesn't churn.
+        if os.path.exists(path):
+            old = open(path).read()
+            if _visible_text(old) == _visible_text(body):
+                return old
         with open(path, "w") as f:
             f.write(body)
         return body
