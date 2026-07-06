@@ -45,6 +45,7 @@ def fetch(url, timeout=60, retries=2):
 
 
 def _visible_text(html_str):
+    html_str = re.sub(r"<(?:style|head)[^>]*>.*?</(?:style|head)>", " ", html_str, flags=re.S)
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html_str))
 
 
@@ -233,11 +234,17 @@ def transform_doc(export_html):
     # heading ids for TOC anchors (replace Google's h.xxx ids with slugs);
     # drop Google's audio-tab artifact headings entirely
     used_ids = set()
+    id_map = {}  # Google heading id -> our slug, to fix the doc's internal links
+
+    dropped_ids = set()
 
     def heading_id(m):
-        level, inner = m.group(1), m.group(3)
+        level, attrs, inner = m.group(1), m.group(2), m.group(3)
         text = htmllib.unescape(re.sub(r"<[^>]+>", "", inner)).strip()
         if text.lower() in ("listen to this tab", ""):
+            old = re.search(r'id="([^"]+)"', attrs)
+            if old:
+                dropped_ids.add(old.group(1))
             return ""
         slug = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:60] or "s"
         base = slug
@@ -246,8 +253,16 @@ def transform_doc(export_html):
             slug = f"{base}-{i}"
             i += 1
         used_ids.add(slug)
+        old = re.search(r'id="([^"]+)"', attrs)
+        if old:
+            id_map[old.group(1)] = slug
         return f'<h{level} id="{slug}">{inner}</h{level}>'
-    out = re.sub(r"<h([1-4])([^>]*)>(.*?)</h\1>", heading_id, out, flags=re.S)
+    out = re.sub(r"<h([1-6])([^>]*)>(.*?)</h\1>", heading_id, out, flags=re.S)
+    for did in dropped_ids:  # remove links to dropped artifact headings
+        out = re.sub(rf'<a href="#{re.escape(did)}">.*?</a>', "", out, flags=re.S)
+    out = re.sub(r"<p[^>]*>(?:\s|&nbsp;|<br>)*</p>", "", out)
+    out = re.sub(r'href="#([^"]+)"',
+                 lambda m: f'href="#{id_map.get(m.group(1), m.group(1))}"', out)
 
     # 5. drop the doc's own title/byline preamble (hero replaces it)
     m = re.search(r'<h1 id="abstract">', out)
