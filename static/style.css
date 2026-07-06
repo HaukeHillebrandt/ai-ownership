@@ -103,6 +103,7 @@ a:hover { color: var(--accent); }
   margin-left: var(--sidebar-w);
   padding: 10px 24px 80px;
   max-width: calc(var(--sidebar-w) + 760px);
+  overflow-wrap: break-word;
 }
 .essay.narrow { margin-left: 0; max-width: 800px; margin-inline: auto; }
 .essay > * { max-width: 700px; }
