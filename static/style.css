@@ -128,6 +128,14 @@ a:hover { color: var(--accent); }
 .essay sup { font-size: 12px; }
 .essay sup a { text-decoration: none; }
 .essay hr { border: 0; border-top: 1px solid var(--line); margin: 40px 0; }
+.footnotes {
+  font-size: 15px; line-height: 1.6; color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.footnotes h2 { font-family: ui-serif, Georgia, serif; color: var(--ink); }
+.footnotes p { margin: 0 0 .7em; }
+.footnotes div { max-width: 700px; }
+sup a:target, .footnotes a:target { background: color-mix(in srgb, var(--accent) 30%, transparent); }
 
 footer {
   margin-left: var(--sidebar-w); padding: 26px 24px 60px;

@@ -269,7 +269,14 @@ def transform_doc(export_html):
     if m:
         out = out[m.start():]
 
-    # 6. images: lazy-load
+    # 6. wrap the footnote block (Google appends bare divs at doc end)
+    fm = re.search(r'<div><p><a id="ftnt1"', out)
+    if fm:
+        out = (out[:fm.start()]
+               + '<section class="footnotes"><h2 id="notes">Notes</h2>'
+               + out[fm.start():] + "</section>")
+
+    # 7. images: lazy-load
     out = out.replace("<img ", '<img loading="lazy" decoding="async" ')
     return out
 
