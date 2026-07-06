@@ -1,0 +1,133 @@
+{
+ "checked": 260,
+ "problems": [
+  {
+   "url": "http://bruegel.org/wp-content/uploads/2017/03/WP-2017_02-1.pdf",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "http://faculty.haas.berkeley.edu/vissing/vissing_nberma_article.pdf",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "http://www.dartmouth.edu/~blnchflr/papers/jcmb_version_inflation_unemployment_%20BBMM.pdf",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://asit-prod-web1.cc.columbia.edu/econdept/wp-content/uploads/sites/41/2019/09/Job_Market_Paper_1104_Mengxue.pdf",
+   "status": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate "
+  },
+  {
+   "url": "https://blogs.lse.ac.uk/politicsandpolicy/how-help-to-buy-helps-the-privileged/",
+   "status": "The read operation timed out"
+  },
+  {
+   "url": "https://core.ac.uk/download/pdf/191545617.pdf",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://economics.mit.edu/files/19857",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://executive.berkeley.edu/sites/default/files/atoms/files/Pursuing%20Innovation%20-%20Sovereign%20Wealth%20Funds%20and%20Technology%20Investment.pdf",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://florianederer.github.io/co_around_the_world.pdf",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://johanneshimmelreich.net/papers/against-democratizing-AI.pdf",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://kentclarkcenter.org/filterable-categories/on-global-markets/passive-support/",
+   "status": "HTTP Error 406: Not Acceptable"
+  },
+  {
+   "url": "https://kentclarkcenter.org/surveys/frozen-assets-2/",
+   "status": "HTTP Error 406: Not Acceptable"
+  },
+  {
+   "url": "https://kentclarkcenter.org/surveys/government-as-shareholder",
+   "status": "HTTP Error 406: Not Acceptable"
+  },
+  {
+   "url": "https://kentclarkcenter.org/surveys/passive-investors-and-us-banks/",
+   "status": "HTTP Error 406: Not Acceptable"
+  },
+  {
+   "url": "https://kentclarkcenter.org/surveys/spacex-ipo/",
+   "status": "HTTP Error 406: Not Acceptable"
+  },
+  {
+   "url": "https://kentclarkcenter.org/surveys/trump-accounts",
+   "status": "HTTP Error 406: Not Acceptable"
+  },
+  {
+   "url": "https://ora.ox.ac.uk/objects/uuid:ea3c7cb8-2464-45f1-a47c-c7b568f27665/download_file?file_format=pdf&amp;safe_filename=JADE%2BLEUNG%2B-%2BDPHIL%2BTHESIS%2B-%2BSep19.pdf&amp;type_of_work=Thesis",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://scholar.google.com/scholar_url?url=https://arxiv.org/pdf/2206.11068&amp;hl=en&amp;sa=X&amp;d=6211727038937650542&amp;ei=yVa6YuPnEsKM6rQP7bmI6AM&amp;scisig=AAGBfm2vx7sXEXIXehkM7WW_lNQvDCRoQQ&amp;oi=scholaralrt&amp;hist=YqLEDzkAAAAJ:8262035116478173559:AAGBfm2k6UhIX3Q4iM5yyWdZ2acf2uZThA&amp;html=&amp;pos=0&amp;folt=kw",
+   "status": "204"
+  },
+  {
+   "url": "https://sci-hub.tw/https://www.sciencedirect.com/science/article/pii/S1057521918308068#page=5",
+   "status": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occur"
+  },
+  {
+   "url": "https://www.barrons.com/articles/blackrock-is-biggest-beneficiary-of-fed-purchases-of-corporate-bond-etfs-51591034726",
+   "status": "HTTP Error 401: HTTP Forbidden"
+  },
+  {
+   "url": "https://www.bloombergquint.com/gadfly/fed-s-etf-purchases-have-changed-markets-forever",
+   "status": "<urlopen error [Errno 8] nodename nor servname provided, or "
+  },
+  {
+   "url": "https://www.fhi.ox.ac.uk/wp-content/uploads/Deciphering_Chinas_AI-Dream.pdf",
+   "status": "<urlopen error [Errno 8] nodename nor servname provided, or "
+  },
+  {
+   "url": "https://www.fhi.ox.ac.uk/wp-content/uploads/Windfall-Clause-Report.pdf",
+   "status": "<urlopen error [Errno 8] nodename nor servname provided, or "
+  },
+  {
+   "url": "https://www.fhi.ox.ac.uk/wp-content/uploads/Windfall-Clause-Report.pdf#page=50",
+   "status": "<urlopen error [Errno 8] nodename nor servname provided, or "
+  },
+  {
+   "url": "https://www.omm.com/resources/alerts-and-publications/alerts/us-antitrust-agencies-focus-common-ownership/",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://www.reuters.com/business/media-telecom/msci-confirms-early-index-inclusion-rules-ahead-spacex-ipo-2026-06-08/",
+   "status": "HTTP Error 401: HTTP Forbidden"
+  },
+  {
+   "url": "https://www.reuters.com/technology/bytedance-says-china-unit-holds-local-licences-response-media-report-2021-08-16/",
+   "status": "HTTP Error 401: HTTP Forbidden"
+  },
+  {
+   "url": "https://www.reuters.com/technology/us-proposes-targeted-restrictions-ai-tech-investment-china-2024-06-21/",
+   "status": "HTTP Error 401: HTTP Forbidden"
+  },
+  {
+   "url": "https://www.wolframalpha.com/input/?i=%28%24112+billion%29+%2F+%28GDP+of+United+States%29",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://www.wolframalpha.com/input/?i=%28%2433+billion%29+%2F+%28GDP+of+France%29",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://www.wolframalpha.com/input/?i=france+population+*++357%2C700+*+0.308+*+.0232+*+0.2",
+   "status": "HTTP Error 404: Not Found"
+  },
+  {
+   "url": "https://www.wolframalpha.com/input/?i=us+population+*++635%2C000+*+0.302+*+0.0089+*+0.2",
+   "status": "HTTP Error 404: Not Found"
+  }
+ ]
+}
