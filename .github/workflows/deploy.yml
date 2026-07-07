@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "17 6 * * *"   # daily rebuild: picks up edits to the Google Doc
+    - cron: "43 6 * * *"   # daily rebuild: picks up edits to the Google Doc
   workflow_dispatch:
 
 permissions:
