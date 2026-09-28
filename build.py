@@ -175,8 +175,16 @@ def unwrap_google_link(url):
     return url
 
 
+COMMENT_ANCHOR_RE = re.compile(
+    r'(?:<sup>\s*)?<a href="#cmnt\d+" id="cmnt_ref\d+">\[\w+\]</a>(?:\s*</sup>)?')
+COMMENT_BODY_RE = re.compile(
+    r'<div[^>]*>\s*<p[^>]*>\s*<a href="#cmnt_ref\d+" id="cmnt\d+">.*?</div>', re.S)
+
+
 def transform_doc(export_html):
     """Google Docs export HTML -> clean semantic HTML."""
+    # The export includes comment threads that doc viewers never see.
+    export_html = COMMENT_BODY_RE.sub("", COMMENT_ANCHOR_RE.sub("", export_html))
     styles = parse_class_styles(export_html)
     body = re.search(r"<body[^>]*>(.*)</body>", export_html, re.S).group(1)
 
