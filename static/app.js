@@ -30,9 +30,15 @@
   var btn = document.getElementById('menu-btn');
   var sidebar = document.getElementById('sidebar');
   if (btn && sidebar) {
-    btn.addEventListener('click', function () { sidebar.classList.toggle('open'); });
+    btn.setAttribute('aria-expanded', 'false');
+    btn.addEventListener('click', function () {
+      btn.setAttribute('aria-expanded', String(sidebar.classList.toggle('open')));
+    });
     sidebar.addEventListener('click', function (e) {
-      if (e.target.tagName === 'A') sidebar.classList.remove('open');
+      if (e.target.tagName === 'A') {
+        sidebar.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
     });
   }
 })();

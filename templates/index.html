@@ -4,65 +4,67 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Diversifying AI Ownership — Hauke Hillebrandt</title>
-<meta name="description" content="Broadly distributed ownership of advanced AI would decentralize power, share the gains, and hedge against technological unemployment. Three concrete policies to get there.">
+<meta name="description" content="Working paper by Hauke Hillebrandt on diversifying the ownership of corporations to reduce risks from AI. Cited in Nick Bostrom's Open Global Investment paper.">
 <link rel="canonical" href="{{BASE}}/">
 <meta property="og:title" content="Diversifying AI Ownership">
-<meta property="og:description" content="Broadly distributed ownership of advanced AI would decentralize power, share the gains, and hedge against technological unemployment. Three concrete policies to get there.">
+<meta property="og:description" content="Working paper by Hauke Hillebrandt on diversifying the ownership of corporations to reduce risks from AI.">
 <meta property="og:type" content="article">
 <meta property="og:image" content="{{BASE}}/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#f5f1e8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14212e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0d11" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&amp;display=swap">
 <link rel="stylesheet" href="style.css">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"ScholarlyArticle",
  "headline":"Diversifying AI Ownership",
  "author":[{"@type":"Person","name":"Hauke Hillebrandt"}],
- "datePublished":"2025","url":"{{BASE}}/"}
+ "url":"{{BASE}}/"}
 </script>
 </head>
 <body>
-<div id="progress"></div>
+<div id="progress" aria-hidden="true"></div>
 
-<nav class="sidebar" id="sidebar">
-  <a class="brand" href="{{BASE}}/">Diversifying<br>AI Ownership</a>
+<nav class="sidebar" id="sidebar" aria-label="Contents">
+  <a class="brand" href="{{BASE}}/"><span class="mark" aria-hidden="true"></span>Diversifying<br>AI Ownership</a>
+  <p class="toc-label">Part I</p>
   <div class="toc" id="toc">
 {{TOC}}
   </div>
   <div class="sidebar-links">
+    {{PART2_LINK}}
     <a href="ogi">Companion: Bostrom’s OGI model →</a>
-    <a href="{{DOC_URL}}" target="_blank" rel="noopener">Comment on Google Docs ↗</a>
+    <a href="{{DOC_URL}}" target="_blank" rel="noopener">Comment in Google Docs ↗</a>
+    <a href="{{HOME_URL}}">Hauke Hillebrandt →</a>
   </div>
 </nav>
 
-<header class="hero">
-  <p class="kicker">Working paper · 2025</p>
-  <h1 class="site-title">Diversifying AI&nbsp;Ownership</h1>
-  <p class="authors">Hauke Hillebrandt</p>
-  <p class="standfirst">Ownership of advanced AI is concentrating fast — in a handful of
-     firms, and in one or two countries. This paper argues that broadly distributed
-     ownership would decentralize power, share the gains, and hedge against technological
-     unemployment, and proposes three concrete policies to get there. It is cited in
-     Nick Bostrom’s <a href="ogi">Open Global Investment</a> model of AGI governance.</p>
-  <p class="hero-actions">
-    <a class="btn primary" href="#content-start">Start reading ↓</a>
-    <a class="btn" href="{{DOC_URL}}" target="_blank" rel="noopener">Google Doc ↗</a>
-    <a class="btn" href="ogi">Bostrom’s OGI →</a>
-  </p>
-</header>
+<main class="page">
+  <header class="hero">
+    <p class="kicker">Working paper</p>
+    <h1 class="site-title">Diversifying AI&nbsp;Ownership</h1>
+    <p class="authors">Hauke Hillebrandt</p>
+    <p class="cited">Cited in Nick Bostrom’s <a href="{{OGI_PDF}}" target="_blank" rel="noopener"><em>Open Global Investment as a Governance Model for AGI</em></a>.</p>
+    <p class="hero-actions">
+      <a class="btn primary" href="#abstract">Start reading <span aria-hidden="true">↓</span></a>
+      <a class="btn" href="{{DOC_URL}}" target="_blank" rel="noopener">Open in Google Docs <span aria-hidden="true">↗</span></a>
+    </p>
+  </header>
 
-<main class="essay" id="content-start">
+  <article class="essay">
 {{CONTENT}}
+  </article>
+
+  <footer class="page-footer">
+    <p>Part I of a working paper by <a href="{{HOME_URL}}">Hauke Hillebrandt</a>. Rebuilt from the Google Doc; last build {{UPDATED}}.</p>
+    <p><a href="ogi">Companion note on Bostrom’s Open Global Investment model</a></p>
+  </footer>
 </main>
 
-<footer>
-  <p><a href="ogi">Companion note: Bostrom’s Open Global Investment model</a></p>
-  <p>Comments welcome — <a href="{{DOC_URL}}" target="_blank" rel="noopener">open the
-     Google Doc</a> and leave a suggestion. Site rebuilt from the doc {{UPDATED}}.</p>
-</footer>
-
-<button id="menu-btn" aria-label="Table of contents">☰</button>
+<button id="menu-btn" aria-label="Contents" aria-controls="sidebar">☰</button>
 <script src="app.js"></script>
 </body>
 </html>

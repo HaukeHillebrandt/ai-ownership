@@ -1,36 +1,39 @@
 #!/usr/bin/env python3
 """Build the 'Diversifying AI Ownership' essay site.
 
-Fetches the Google Doc at build time, converts its exported HTML into clean
-semantic HTML (situational-awareness.ai-style typography), and renders a
-static site into dist/. The companion page summarises Bostrom's OGI paper
-and links to the PDF (no full reproduction).
+Renders the Google Doc's first tab (Part I) as a long-form essay page. Later
+tabs (Part II, appendices, notes) stay in Google Docs; Part II is linked at
+the end. The companion page summarises Bostrom's OGI paper (drafted with AI
+assistance, labelled as such) and links the PDF instead of reproducing it.
 
-Stdlib only for the build; Pillow (optional) for images/social cards.
+Stdlib only for the build; Pillow (optional) for images and social cards.
 """
 import base64
 import hashlib
-import json
 import os
 import re
 import shutil
 import sys
 import html as htmllib
-import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
+
+from docrender import parse_tabs, plain, to_article
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 CACHE = os.path.join(ROOT, "data", "cache")
+FONT_DIR = os.path.join(ROOT, "assets", "fonts")
 UA = {"User-Agent": "Mozilla/5.0 (compatible; ai-ownership-builder)"}
 
 DOC_ID = "1ISGuSmNMRT_nLYeUUxHtPGdQVdfn3h0TyNW-GYnGgvU"
 BASE_URL = os.environ.get("SITE_BASE",
                           "https://haukehillebrandt.github.io/ai-ownership").rstrip("/")
 SITE_TITLE = "Diversifying AI Ownership"
+AUTHOR = "Hauke Hillebrandt"
 DOC_URL = f"https://docs.google.com/document/d/{DOC_ID}/edit"
 OGI_PDF = "https://nickbostrom.com/ogimodel.pdf"
+HOME_URL = "https://haukehillebrandt.github.io/hfh.pw/"
 
 
 def fetch(url, timeout=60, retries=2):
@@ -49,16 +52,19 @@ def _visible_text(html_str):
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html_str))
 
 
-def cached_doc_html():
+def cached_doc_html(tab):
+    """First-tab export, with a committed fallback cache.
+
+    Google's export markup is volatile (class names shuffle) even when the
+    doc is unchanged; the cache is only rewritten on real edits so the
+    Action's auto-commit doesn't churn.
+    """
     os.makedirs(CACHE, exist_ok=True)
     path = os.path.join(CACHE, "doc.html")
     try:
-        body = fetch(f"https://docs.google.com/document/d/{DOC_ID}/export?format=html")
+        body = fetch(f"https://docs.google.com/document/d/{DOC_ID}/export?format=html&tab={tab}")
         if "<body" not in body:
             raise ValueError("no body in export")
-        # Google's export markup is volatile (class names shuffle) even when the
-        # doc is unchanged; only rewrite the committed cache on real edits so
-        # the Action's auto-commit doesn't churn.
         if os.path.exists(path):
             old = open(path).read()
             if _visible_text(old) == _visible_text(body):
@@ -143,162 +149,7 @@ def externalize_images(html_str):
     return DATA_URI_RE.sub(repl, html_str)
 
 
-# ---------------------------------------------------------------- doc -> clean html
-
-def parse_class_styles(export_html):
-    """Map Google's generated CSS classes to inline semantics."""
-    styles = {}
-    m = re.search(r"<style[^>]*>(.*?)</style>", export_html, re.S)
-    if not m:
-        return styles
-    for rule in re.finditer(r"([^{}]+)\{([^}]*)\}", m.group(1)):
-        selectors, body = rule.group(1), rule.group(2)
-        props = {
-            "bold": "font-weight:700" in body or "font-weight:bold" in body,
-            "italic": "font-style:italic" in body,
-            "underline": "text-decoration:underline" in body,
-            "sup": "vertical-align:super" in body,
-        }
-        if not any(props.values()):
-            continue
-        for sel in selectors.split(","):
-            sel = sel.strip()
-            if sel.startswith("."):
-                styles[sel[1:]] = props
-    return styles
-
-
-def unwrap_google_link(url):
-    m = re.match(r"https://www\.google\.com/url\?q=([^&]+)", url)
-    if m:
-        return urllib.parse.unquote(m.group(1))
-    return url
-
-
-COMMENT_ANCHOR_RE = re.compile(
-    r'(?:<sup>\s*)?<a href="#cmnt\d+" id="cmnt_ref\d+">\[\w+\]</a>(?:\s*</sup>)?')
-COMMENT_BODY_RE = re.compile(
-    r'<div[^>]*>\s*<p[^>]*>\s*<a href="#cmnt_ref\d+" id="cmnt\d+">.*?</div>', re.S)
-
-
-def transform_doc(export_html):
-    """Google Docs export HTML -> clean semantic HTML."""
-    # The export includes comment threads that doc viewers never see.
-    export_html = COMMENT_BODY_RE.sub("", COMMENT_ANCHOR_RE.sub("", export_html))
-    styles = parse_class_styles(export_html)
-    body = re.search(r"<body[^>]*>(.*)</body>", export_html, re.S).group(1)
-
-    def classes_of(tag_attrs):
-        m = re.search(r'class="([^"]*)"', tag_attrs)
-        return m.group(1).split() if m else []
-
-    def span_semantics(attrs):
-        bold = italic = sup = False
-        for c in classes_of(attrs):
-            p = styles.get(c)
-            if p:
-                bold |= p["bold"]
-                italic |= p["italic"]
-                sup |= p["sup"]
-        return bold, italic, sup
-
-    out = body
-    # 1. unwrap redirect links, drop trailing google params
-    out = re.sub(r'href="(https://www\.google\.com/url\?q=[^"]+)"',
-                 lambda m: 'href="' + esc(unwrap_google_link(htmllib.unescape(m.group(1)))) + '"',
-                 out)
-    # 2. spans -> strong/em/sup or plain text
-    def span_repl(m):
-        attrs, inner = m.group(1), m.group(2)
-        bold, italic, sup = span_semantics(attrs)
-        if sup:
-            return f"<sup>{inner}</sup>"
-        if bold and italic:
-            return f"<strong><em>{inner}</em></strong>"
-        if bold:
-            return f"<strong>{inner}</strong>"
-        if italic:
-            return f"<em>{inner}</em>"
-        return inner
-    prev = None
-    while prev != out:  # spans can nest
-        prev = out
-        out = re.sub(r"<span([^>]*)>((?:(?!</?span).)*)</span>", span_repl, out, flags=re.S)
-
-    # 3. strip class/style/id junk from structural tags (keep footnote ids/hrefs)
-    def clean_tag(m):
-        tag = m.group(1)
-        attrs = m.group(2)
-        keep = ""
-        for attr in ("id", "href", "src", "alt", "colspan", "rowspan"):
-            am = re.search(rf'{attr}="([^"]*)"', attrs)
-            if am:
-                keep += f' {attr}="{am.group(1)}"'
-        return f"<{tag}{keep}>"
-    out = re.sub(r"<(h[1-6]|p|ul|ol|li|a|td|tr|table|img|div)\b([^>]*)>", clean_tag, out)
-
-    # 4. drop empty paragraphs
-    out = re.sub(r"<p[^>]*>(?:\s|&nbsp;|<br>)*</p>", "", out)
-    # heading ids for TOC anchors (replace Google's h.xxx ids with slugs);
-    # drop Google's audio-tab artifact headings entirely
-    used_ids = set()
-    id_map = {}  # Google heading id -> our slug, to fix the doc's internal links
-
-    dropped_ids = set()
-
-    def heading_id(m):
-        level, attrs, inner = m.group(1), m.group(2), m.group(3)
-        text = htmllib.unescape(re.sub(r"<[^>]+>", "", inner)).strip()
-        if text.lower() in ("listen to this tab", ""):
-            old = re.search(r'id="([^"]+)"', attrs)
-            if old:
-                dropped_ids.add(old.group(1))
-            return ""
-        slug = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:60] or "s"
-        base = slug
-        i = 2
-        while slug in used_ids:
-            slug = f"{base}-{i}"
-            i += 1
-        used_ids.add(slug)
-        old = re.search(r'id="([^"]+)"', attrs)
-        if old:
-            id_map[old.group(1)] = slug
-        return f'<h{level} id="{slug}">{inner}</h{level}>'
-    out = re.sub(r"<h([1-6])([^>]*)>(.*?)</h\1>", heading_id, out, flags=re.S)
-    for did in dropped_ids:  # remove links to dropped artifact headings
-        out = re.sub(rf'<a href="#{re.escape(did)}">.*?</a>', "", out, flags=re.S)
-    out = re.sub(r"<p[^>]*>(?:\s|&nbsp;|<br>)*</p>", "", out)
-    out = re.sub(r'href="#([^"]+)"',
-                 lambda m: f'href="#{id_map.get(m.group(1), m.group(1))}"', out)
-
-    # 5. drop the doc's own title/byline preamble (hero replaces it)
-    m = re.search(r'<h1 id="abstract">', out)
-    if m:
-        out = out[m.start():]
-
-    # 6. wrap the footnote block (Google appends bare divs at doc end)
-    fm = re.search(r'<div><p><a id="ftnt1"', out)
-    if fm:
-        out = (out[:fm.start()]
-               + '<section class="footnotes"><h2 id="notes">Notes</h2>'
-               + out[fm.start():] + "</section>")
-
-    # 7. images: lazy-load
-    out = out.replace("<img ", '<img loading="lazy" decoding="async" ')
-    return out
-
-
-def extract_toc(clean_html):
-    toc = []
-    for m in re.finditer(r'<h([12]) id="([^"]+)">(.*?)</h\1>', clean_html, re.S):
-        text = htmllib.unescape(re.sub(r"<[^>]+>", "", m.group(3))).strip()
-        if text:
-            toc.append({"level": int(m.group(1)), "id": m.group(2), "title": text})
-    return toc
-
-
-# ---------------------------------------------------------------- og image
+# ---------------------------------------------------------------- social cards
 
 def make_og(title, subtitle, out_name):
     try:
@@ -306,25 +157,22 @@ def make_og(title, subtitle, out_name):
     except ImportError:
         return
     import textwrap
-    font_path = None
-    for f in ["/System/Library/Fonts/Supplemental/Georgia Bold.ttf",
-              "/System/Library/Fonts/Supplemental/Georgia.ttf",
-              "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"]:
-        if os.path.exists(f):
-            font_path = f
-            break
-    if not font_path:
+
+    def font(size, weight=700):
+        path = os.path.join(FONT_DIR, f"Inter-{weight}.ttf")
+        return ImageFont.truetype(path, size) if os.path.exists(path) else None
+
+    if not font(10):
         return
-    im = Image.new("RGB", (1200, 630), "#14212e")
+    im = Image.new("RGB", (1200, 630), "#0f1115")
     d = ImageDraw.Draw(im)
-    d.rectangle([0, 0, 1200, 10], fill="#d4a24e")
-    big = ImageFont.truetype(font_path, 72)
-    small = ImageFont.truetype(font_path, 32)
-    y = 200
-    for line in textwrap.wrap(title, width=26)[:3]:
-        d.text((80, y), line, font=big, fill="#f5f1e8")
-        y += 92
-    d.text((84, y + 30), subtitle, font=small, fill="#a8b4c0")
+    d.rectangle([80, 84, 108, 112], fill="#1f3fe0")
+    d.text((126, 80), AUTHOR, font=font(30, 500), fill="#9aa3b2")
+    y = 210
+    for line in textwrap.wrap(title, width=24)[:3]:
+        d.text((80, y), line, font=font(76), fill="#ffffff")
+        y += 90
+    d.text((80, y + 24), subtitle, font=font(32, 500), fill="#9aa3b2")
     im.save(os.path.join(DIST, out_name), "PNG", optimize=True)
 
 
@@ -332,7 +180,12 @@ def make_og(title, subtitle, out_name):
 
 def build():
     print("Fetching doc…")
-    export = cached_doc_html()
+    first, tabs = "t.0", []
+    try:
+        first, tabs = parse_tabs(fetch(f"https://docs.google.com/document/d/{DOC_ID}/preview"))
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] tab lookup failed ({e}); using the first tab", file=sys.stderr)
+    export = cached_doc_html(first)
 
     if os.path.exists(DIST):
         shutil.rmtree(DIST)
@@ -340,32 +193,38 @@ def build():
     for f in os.listdir(os.path.join(ROOT, "static")):
         shutil.copy(os.path.join(ROOT, "static", f), DIST)
 
-    print("Transforming…")
-    clean = transform_doc(export)
-    clean = externalize_images(clean)
+    print("Rendering…")
+    art = to_article(export, [SITE_TITLE] + [t for i, t, _ in tabs if i == first], author=AUTHOR)
+    body = art["body"]
+    start = re.search(r'<h[1-3] id="abstract">', body)
+    if start:  # the hero replaces the doc's own title block
+        body = body[start.start():]
+    body = externalize_images(body)
 
-    toc = extract_toc(clean)
+    part2 = next(((i, t) for i, t, _ in tabs if t.lower().startswith("part ii")), None)
+    part2_link = ""
+    if part2:
+        href = f"{DOC_URL}?tab={part2[0]}"
+        block = render(template("_continue.html"), HREF=esc(href), TITLE=esc(part2[1]))
+        notes = body.find('<section class="footnotes">')
+        body = body[:notes] + block + body[notes:] if notes != -1 else body + block
+        part2_link = (f'<a href="{esc(href)}" target="_blank" rel="noopener">'
+                      f'{esc(part2[1].split(":")[0])} (working draft) ↗</a>')
+
+    toc = [(int(m.group(1)), m.group(2), plain(m.group(3)))
+           for m in re.finditer(r'<h([12]) id="([^"]+)">(.*?)</h\1>', body, re.S)]
     toc_html = "\n".join(
-        f'<a class="toc-{t["level"]}" href="#{t["id"]}">'
-        f'{esc(t["title"][:64] + ("…" if len(t["title"]) > 64 else ""))}</a>'
-        for t in toc)
+        f'<a class="toc-{lvl}" href="#{tid}">{esc(text[:64] + ("…" if len(text) > 64 else ""))}</a>'
+        for lvl, tid, text in toc)
 
-    updated = datetime.now(timezone.utc).strftime("%d %B %Y")
-    index = render(template("index.html"),
-                   BASE=BASE_URL,
-                   CONTENT=clean,
-                   TOC=toc_html,
-                   DOC_URL=DOC_URL,
-                   OGI_PDF=OGI_PDF,
-                   UPDATED=updated)
-    open(os.path.join(DIST, "index.html"), "w").write(index)
+    updated = datetime.now(timezone.utc).strftime("%-d %B %Y")
+    common = dict(BASE=BASE_URL, DOC_URL=DOC_URL, OGI_PDF=OGI_PDF, HOME_URL=HOME_URL, UPDATED=updated)
+    open(os.path.join(DIST, "index.html"), "w").write(render(
+        template("index.html"), CONTENT=body, TOC=toc_html, PART2_LINK=part2_link, **common))
+    open(os.path.join(DIST, "ogi.html"), "w").write(render(template("ogi.html"), **common))
 
-    ogi = render(template("ogi.html"),
-                 BASE=BASE_URL, OGI_PDF=OGI_PDF, DOC_URL=DOC_URL, UPDATED=updated)
-    open(os.path.join(DIST, "ogi.html"), "w").write(ogi)
-
-    make_og(SITE_TITLE, "Hauke Hillebrandt (2025) · Working paper", "og.png")
-    make_og("Open Global Investment", "A companion note on Bostrom (2025)", "og-ogi.png")
+    make_og(SITE_TITLE, "Working paper · Part I", "og.png")
+    make_og("The Open Global Investment model", "A companion note on Bostrom (2025)", "og-ogi.png")
 
     open(os.path.join(DIST, "robots.txt"), "w").write(
         f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}/sitemap.xml\n")
@@ -377,12 +236,13 @@ def build():
     open(os.path.join(DIST, "404.html"), "w").write(
         f'<!doctype html><meta http-equiv="refresh" content="0;url={BASE_URL}/">')
 
-    # sanity gate
-    text_len = len(re.sub(r"<[^>]+>", "", clean))
-    if text_len < 30_000 or len(toc) < 4:
+    # sanity gate: refuse to ship an obviously broken build
+    text_len = len(plain(body))
+    if text_len < 8_000 or len(toc) < 3:
         print(f"BUILD REJECTED: text={text_len} toc={len(toc)}", file=sys.stderr)
         sys.exit(1)
-    print(f"Done: {text_len/1000:.0f}k chars, {len(toc)} TOC entries -> dist/")
+    print(f"Done: {text_len / 1000:.0f}k chars from tab {first!r}, {len(toc)} TOC entries, "
+          f"Part II link: {bool(part2)} -> dist/")
 
 
 if __name__ == "__main__":

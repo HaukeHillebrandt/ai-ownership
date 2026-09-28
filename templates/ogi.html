@@ -11,18 +11,23 @@
 <meta property="og:type" content="article">
 <meta property="og:image" content="{{BASE}}/og-ogi.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#f5f1e8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14212e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0d11" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&amp;display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="companion">
-<div id="progress"></div>
+<div id="progress" aria-hidden="true"></div>
 
 <header class="hero compact">
   <p class="kicker"><a href="{{BASE}}/">← Diversifying AI Ownership</a></p>
   <h1 class="site-title">The Open Global Investment model</h1>
   <p class="authors">A companion note on Bostrom (2025)</p>
+  <p class="disclosure">This summary was drafted with AI assistance (Claude). For Bostrom’s
+     argument in his own words, read <a href="{{OGI_PDF}}" target="_blank" rel="noopener">the paper</a>.</p>
   <p class="standfirst">Nick Bostrom’s working paper
      <em>Open Global Investment as a Governance Model for AGI</em> proposes governing
      AGI development through corporations that are open to worldwide shareholding —
@@ -112,9 +117,9 @@ the full paper: Open Global Investment as a Governance Model for AGI (PDF) ↗</
 
 </main>
 
-<footer>
-  <p>Summary written for context; all credit for the OGI model to Nick Bostrom —
-     <a href="https://nickbostrom.com" target="_blank" rel="noopener">nickbostrom.com</a>.
+<footer class="page-footer">
+  <p>Summary drafted with AI assistance for context; all credit for the OGI model to Nick Bostrom
+     (<a href="https://nickbostrom.com" target="_blank" rel="noopener">nickbostrom.com</a>).
      Page updated {{UPDATED}}.</p>
 </footer>
 </body>
